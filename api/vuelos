@@ -1,0 +1,12 @@
+[
+    {
+        "id": "402",
+        "displayText": "Barranquilla (BAQ)",
+        "displayDestinationHtml": "Colombia",
+        "displayHtml": "<em>Barranquilla<\/em> (BAQ)",
+        "type": 0,
+        "isActive": true,
+        "code": "BAQ",
+        "country": "CO"
+    }
+]
