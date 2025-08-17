@@ -1,10 +1,18 @@
-// archivo: api/datos.js
+// api/datos.js
+
+// ⚠️ Esta variable vive en memoria mientras la función esté "caliente" en Vercel
+let ultimaBusqueda = [];
+
 export default function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido, usa POST" });
   }
 
-  // Lista de ciudades igual que en datos.php
+  const { query } = req.body || {};
+  if (!query || query.trim() === "") {
+    return res.status(400).json({ error: "No se recibió una consulta válida" });
+  }
+
   const ciudades = [
     {
       id: "400",
@@ -14,7 +22,7 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "AXM",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "402",
@@ -24,7 +32,7 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "BAQ",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "403",
@@ -34,7 +42,7 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "BOG",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "404",
@@ -44,7 +52,7 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "BGA",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "405",
@@ -54,7 +62,7 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "CLO",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "406",
@@ -64,97 +72,17 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "CTG",
-      country: "CO"
+      country: "CO",
     },
     {
-      id: "407",
+      id: "408",
       displayText: "Cúcuta (CUC)",
       displayDestinationHtml: "Colombia",
       displayHtml: "<em>Cúcuta</em> (CUC)",
       type: 0,
       isActive: true,
       code: "CUC",
-      country: "CO"
-    },
-    {
-      id: "408",
-      displayText: "Medellín (MDE)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Medellín</em> (MDE)",
-      type: 0,
-      isActive: true,
-      code: "MDE",
-      country: "CO"
-    },
-    {
-      id: "423",
-      displayText: "San Andrés (ADZ)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>San Andrés</em> (ADZ)",
-      type: 0,
-      isActive: true,
-      code: "ADZ",
-      country: "CO"
-    },
-    {
-      id: "424",
-      displayText: "San José del Guaviare (SJE)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>San José del Guaviare</em> (SJE)",
-      type: 0,
-      isActive: true,
-      code: "SJE",
-      country: "CO"
-    },
-    {
-      id: "425",
-      displayText: "Santa Marta (SMR)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Santa Marta</em> (SMR)",
-      type: 0,
-      isActive: true,
-      code: "SMR",
-      country: "CO"
-    },
-    {
-      id: "426",
-      displayText: "Tumaco (TCO)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Tumaco</em> (TCO)",
-      type: 0,
-      isActive: true,
-      code: "TCO",
-      country: "CO"
-    },
-    {
-      id: "428",
-      displayText: "Villavicencio (VVC)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Villavicencio</em> (VVC)",
-      type: 0,
-      isActive: true,
-      code: "VVC",
-      country: "CO"
-    },
-    {
-      id: "419",
-      displayText: "Popayán (PPN)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Popayán</em> (PPN)",
-      type: 0,
-      isActive: true,
-      code: "PPN",
-      country: "CO"
-    },
-    {
-      id: "415",
-      displayText: "Montería (MTR)",
-      displayDestinationHtml: "Colombia",
-      displayHtml: "<em>Montería</em> (MTR)",
-      type: 0,
-      isActive: true,
-      code: "MTR",
-      country: "CO"
+      country: "CO",
     },
     {
       id: "410",
@@ -164,25 +92,209 @@ export default function handler(req, res) {
       type: 0,
       isActive: true,
       code: "IBE",
-      country: "CO"
+      country: "CO",
+    },
+    {
+      id: "413",
+      displayText: "Manizales (MZL)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Manizales</em> (MZL)",
+      type: 0,
+      isActive: true,
+      code: "MZL",
+      country: "CO",
+    },
+    {
+      id: "414",
+      displayText: "Medellín - José María Córdova (MDE)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Medellín - José María Córdova</em> (MDE)",
+      type: 0,
+      isActive: true,
+      code: "MDE",
+      country: "CO",
+    },
+    {
+      id: "415",
+      displayText: "Medellín - Olaya Herrera (EOH)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Medellín - Olaya Herrera</em> (EOH)",
+      type: 0,
+      isActive: true,
+      code: "EOH",
+      country: "CO",
+    },
+    {
+      id: "416",
+      displayText: "Montería (MTR)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Montería</em> (MTR)",
+      type: 0,
+      isActive: true,
+      code: "MTR",
+      country: "CO",
+    },
+    {
+      id: "417",
+      displayText: "Neiva (NVA)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Neiva</em> (NVA)",
+      type: 0,
+      isActive: true,
+      code: "NVA",
+      country: "CO",
+    },
+    {
+      id: "418",
+      displayText: "Pasto (PSO)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Pasto</em> (PSO)",
+      type: 0,
+      isActive: true,
+      code: "PSO",
+      country: "CO",
+    },
+    {
+      id: "419",
+      displayText: "Pereira (PEI)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Pereira</em> (PEI)",
+      type: 0,
+      isActive: true,
+      code: "PEI",
+      country: "CO",
+    },
+    {
+      id: "420",
+      displayText: "Popayán (PPN)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Popayán</em> (PPN)",
+      type: 0,
+      isActive: true,
+      code: "PPN",
+      country: "CO",
+    },
+    {
+      id: "421",
+      displayText: "Puerto Asís (PUU)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Puerto Asís</em> (PUU)",
+      type: 0,
+      isActive: true,
+      code: "PUU",
+      country: "CO",
     },
     {
       id: "422",
+      displayText: "Quibdó (UIB)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Quibdó</em> (UIB)",
+      type: 0,
+      isActive: true,
+      code: "UIB",
+      country: "CO",
+    },
+    {
+      id: "423",
       displayText: "Riohacha (RCH)",
       displayDestinationHtml: "Colombia",
       displayHtml: "<em>Riohacha</em> (RCH)",
       type: 0,
       isActive: true,
       code: "RCH",
-      country: "CO"
-    }
+      country: "CO",
+    },
+    {
+      id: "424",
+      displayText: "San Andrés (ADZ)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>San Andrés</em> (ADZ)",
+      type: 0,
+      isActive: true,
+      code: "ADZ",
+      country: "CO",
+    },
+    {
+      id: "425",
+      displayText: "San José del Guaviare (SJE)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>San José del Guaviare</em> (SJE)",
+      type: 0,
+      isActive: true,
+      code: "SJE",
+      country: "CO",
+    },
+    {
+      id: "426",
+      displayText: "Santa Marta (SMR)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Santa Marta</em> (SMR)",
+      type: 0,
+      isActive: true,
+      code: "SMR",
+      country: "CO",
+    },
+    {
+      id: "427",
+      displayText: "Tame (TME)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Tame</em> (TME)",
+      type: 0,
+      isActive: true,
+      code: "TME",
+      country: "CO",
+    },
+    {
+      id: "428",
+      displayText: "Tumaco (TCO)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Tumaco</em> (TCO)",
+      type: 0,
+      isActive: true,
+      code: "TCO",
+      country: "CO",
+    },
+    {
+      id: "429",
+      displayText: "Valledupar (VUP)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Valledupar</em> (VUP)",
+      type: 0,
+      isActive: true,
+      code: "VUP",
+      country: "CO",
+    },
+    {
+      id: "430",
+      displayText: "Villavicencio (VVC)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Villavicencio</em> (VVC)",
+      type: 0,
+      isActive: true,
+      code: "VVC",
+      country: "CO",
+    },
+    {
+      id: "431",
+      displayText: "Yopal (EYP)",
+      displayDestinationHtml: "Colombia",
+      displayHtml: "<em>Yopal</em> (EYP)",
+      type: 0,
+      isActive: true,
+      code: "EYP",
+      country: "CO",
+    },
   ];
 
-  // Filtrar por query si llega en el body
-  const { query } = req.body || {};
-  const resultados = query
-    ? ciudades.filter(c => c.displayText.toLowerCase().includes(query.toLowerCase()))
-    : ciudades;
+  const resultados = ciudades.filter((ciudad) =>
+    ciudad.displayText.toLowerCase().includes(query.toLowerCase())
+  );
 
-  res.status(200).json(resultados);
+  // Guardamos en memoria la última búsqueda
+  ultimaBusqueda = resultados;
+
+  return res.status(200).json(resultados);
 }
+
+// Exportamos la memoria para que la lea vuelos.js
+export { ultimaBusqueda };
