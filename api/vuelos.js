@@ -1,17 +1,14 @@
-// api/vuelos.js
-import { ultimaBusqueda } from "./datos";
-
 export default function handler(req, res) {
   const { query } = req.query;
 
-  if (query) {
-    // si llega query, filtramos dentro de ultimaBusqueda
-    const resultados = (ultimaBusqueda || []).filter((ciudad) =>
-      ciudad.displayText.toLowerCase().includes(query.toLowerCase())
-    );
-    return res.status(200).json(resultados);
+  if (!query || query.trim() === "") {
+    // si no mandan query, devolver todo
+    return res.status(200).json(ciudades);
   }
 
-  // si no hay query, devolver última búsqueda tal cual
-  res.status(200).json(ultimaBusqueda || []);
+  const resultados = ciudades.filter((ciudad) =>
+    ciudad.displayText.toLowerCase().includes(query.toLowerCase())
+  );
+
+  res.status(200).json(resultados);
 }
