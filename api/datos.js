@@ -1,6 +1,6 @@
 // api/datos.js
 
-// ⚠️ Esta variable vive en memoria mientras la función esté "caliente" en Vercel
+// memoria temporal en el servidor (no se guarda entre despliegues fríos)
 let ultimaBusqueda = [];
 
 export default function handler(req, res) {
@@ -12,6 +12,7 @@ export default function handler(req, res) {
   if (!query || query.trim() === "") {
     return res.status(400).json({ error: "No se recibió una consulta válida" });
   }
+
 
   const ciudades = [
     {
@@ -286,15 +287,16 @@ export default function handler(req, res) {
     },
   ];
 
+  // Filtrar ciudades que coincidan
   const resultados = ciudades.filter((ciudad) =>
     ciudad.displayText.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Guardamos en memoria la última búsqueda
+  // Guardar en memoria
   ultimaBusqueda = resultados;
 
   return res.status(200).json(resultados);
 }
 
-// Exportamos la memoria para que la lea vuelos.js
+// Exportamos para que lo use vuelos.js
 export { ultimaBusqueda };
