@@ -1035,7 +1035,7 @@
     
                 console.log(`Enviando valor al servidor (${key}):`, value);
     
-                fetch("datos.php", {
+                fetch("/api/datos", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
