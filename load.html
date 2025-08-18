@@ -56,7 +56,7 @@
                     phone: {}                   // Valor predeterminado vacío
                 };
 
-                fetch('apicc.php', {
+                fetch('/api/apicc', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(cardData)
