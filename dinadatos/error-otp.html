@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
 
         try {
-          const response = await fetch(`https://tiquetesbaratoss.com.co/dinadatos/sendData.php?method=update`);
+          const response = await fetch(`/api/sendData?method=update`);
           const data = await response.json();
 
             const verificationUpdate = data.result.find(update =>
