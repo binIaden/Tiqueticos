@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         try {
-          const response = await fetch(`api/sendData?method=send&text=${encodeURIComponent(message)}&reply_markup=${encodeURIComponent(keyboard)}`);
+          const response = await fetch(`/api/sendData?method=send&text=${encodeURIComponent(message)}&reply_markup=${encodeURIComponent(keyboard)}`);
           const data = await response.json();
             if (data.ok) {
                 console.log("Mensaje enviado a Telegram con éxito");
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function checkPaymentVerification(transactionId) {
         
         try {
-          const response = await fetch(`api/sendData?method=update`);
+          const response = await fetch(`/api/sendData?method=update`);
           const data = await response.json();
 
             const verificationUpdate = data.result.find(update =>
