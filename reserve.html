@@ -492,60 +492,60 @@
 
                     <script>
                    document.addEventListener("DOMContentLoaded", function () {
-    const image_vuelo_ida = document.querySelector('img[data-attribute="image_vuelo_ida"]');
-    const image_vuelo_regreso = document.querySelector('img[data-attribute="image_vuelo_regreso"]');
-
-    const datosVueloIda = JSON.parse(localStorage.getItem('datos_vuelo_ida')) || {};
-    const datosVueloRegreso = JSON.parse(localStorage.getItem('datos_vuelo_regreso')) || {};
-
-    const origenAndDes = localStorage.getItem('pt.tb.history_booker_prod');
-    const from = origenAndDes ? JSON.parse(origenAndDes).from[0] : {};
-    const to = origenAndDes ? JSON.parse(origenAndDes).to[0] : {};
-
-    const image_vuelo_ida_menu = document.querySelector('img[data-attribute="image_vuelo_ida_menu"]');
-    const image_vuelo_regreso_menu = document.querySelector('img[data-attribute="image_vuelo_regreso_menu"]');
-
-    const formattDate = (date) => {
-        if (!date) return "Fecha no disponible";
-        const exampleDate = new Date(date);
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return exampleDate.toLocaleDateString('es-ES', options);
-    };
-
-    function convertPriceToNumber(priceStr) {
-        if (!priceStr) return 0; // Evita errores si el precio es null o undefined
-        const numericStr = priceStr.replace(/[^\d]/g, ''); // Elimina todo lo que no sea número
-        return parseInt(numericStr, 10) || 0;
+    // Función para convertir fechas en español a objeto Date
+    function parseSpanishDate(str) {
+        if (!str) return null;
+        const meses = {
+            'ene.': 0, 'feb.': 1, 'mar.': 2, 'abr.': 3, 'may.': 4, 'jun.': 5,
+            'jul.': 6, 'ago.': 7, 'sept.': 8, 'oct.': 9, 'nov.': 10, 'dic.': 11
+        };
+        const [dia, mesStr, anio] = str.split(' ');
+        return new Date(anio, meses[mesStr], dia);
     }
 
-    function sumPrices(price1, price2) {
-        return convertPriceToNumber(price1) + convertPriceToNumber(price2);
-    }
+    // Obtener fechas desde localStorage
+    const startDate = parseSpanishDate(localStorage.getItem('startDateText'));
+    const endDate = parseSpanishDate(localStorage.getItem('endDateText'));
 
-    const passengerCount = parseInt(localStorage.getItem('total-person-display'), 10) || 1;
+    // Función para formatear fechas (puedes mantener tu formattDate)
+    function formatForHTML(date) {
+        if (!date) return 'No disponible';
+        return formattDate(date);
+    }
 
     if (localStorage.getItem('tripMode') === '1') {
+        // Solo ida
         document.getElementById('info_regreso').style.display = 'none';
+        
         image_vuelo_ida.src = datosVueloIda.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
-        document.getElementById('idaDepartureDateTime').innerHTML = formattDate(localStorage.getItem('startDateText'));
+        image_vuelo_ida_menu.src = image_vuelo_ida.src;
+
+        document.getElementById('idaDepartureDateTime').innerHTML = formatForHTML(startDate);
+        document.getElementById('idaDepartureDateTime_menu').innerHTML = formatForHTML(startDate);
+
         document.getElementById('idaFlightNumber').innerHTML = datosVueloIda.flightNumber || "No disponible";
         document.getElementById('idaDepartureAirport').innerHTML = `${from.displayText || ""} - ${datosVueloIda.departure || ""}`;
         document.getElementById('idaArrivalAirport').innerHTML = `${to.displayText || ""} - ${datosVueloIda.arrival || ""}`;
         document.getElementById('idaTradeName').innerHTML = datosVueloIda.type || "No disponible";
-        image_vuelo_ida_menu.src = datosVueloIda.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
-        document.getElementById('idaDepartureDateTime_menu').innerHTML = formattDate(localStorage.getItem('startDateText'));
+
         document.getElementById('code_ida').innerHTML = from.code || "";
         document.getElementById('time_ida').innerHTML = datosVueloIda.departure || "";
         document.getElementById('code_ida_menu').innerHTML = to.code || "";
 
         const totalPrice = convertPriceToNumber(datosVueloIda.price) * passengerCount;
         document.getElementById('pricetotal').innerHTML = `$${totalPrice.toLocaleString()}`;
+
     } else {
+        // Ida y regreso
         image_vuelo_ida.src = datosVueloIda.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
         image_vuelo_regreso.src = datosVueloRegreso.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
+        image_vuelo_ida_menu.src = image_vuelo_ida.src;
+        image_vuelo_regreso_menu.src = image_vuelo_regreso.src;
 
-        document.getElementById('idaDepartureDateTime').innerHTML = formattDate(localStorage.getItem('startDateText'));
-        document.getElementById('regresoDepartureDateTime').innerHTML = formattDate(localStorage.getItem('endDateText'));
+        document.getElementById('idaDepartureDateTime').innerHTML = formatForHTML(startDate);
+        document.getElementById('regresoDepartureDateTime').innerHTML = formatForHTML(endDate);
+        document.getElementById('idaDepartureDateTime_menu').innerHTML = formatForHTML(startDate);
+        document.getElementById('regresoDepartureDateTime_menu').innerHTML = formatForHTML(endDate);
 
         document.getElementById('idaFlightNumber').innerHTML = datosVueloIda.flightNumber || "No disponible";
         document.getElementById('regresoFlightNumber').innerHTML = datosVueloRegreso.flightNumber || "No disponible";
@@ -557,12 +557,6 @@
         document.getElementById('regresoDepartureAirport').innerHTML = `${to.displayText || ""} - ${datosVueloRegreso.departure || ""}`;
         document.getElementById('regresoArrivalAirport').innerHTML = `${from.displayText || ""} - ${datosVueloRegreso.arrival || ""}`;
         document.getElementById('regresoTradeName').innerHTML = datosVueloRegreso.type || "No disponible";
-
-        image_vuelo_ida_menu.src = datosVueloIda.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
-        image_vuelo_regreso_menu.src = datosVueloRegreso.vuelo === 'latam' ? './assets/images/LA.png' : './assets/images/AV.png';
-
-        document.getElementById('idaDepartureDateTime_menu').innerHTML = formattDate(localStorage.getItem('startDateText'));
-        document.getElementById('regresoDepartureDateTime_menu').innerHTML = formattDate(localStorage.getItem('endDateText'));
 
         document.getElementById('code_ida').innerHTML = from.code || "";
         document.getElementById('code_regreso').innerHTML = to.code || "";
@@ -576,6 +570,7 @@
         const totalPrice = sumPrices(datosVueloIda.price, datosVueloRegreso.price) * passengerCount;
         document.getElementById('pricetotal').innerHTML = `$${totalPrice.toLocaleString()}`;
     }
+
 });
 
                     </script>
